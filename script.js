@@ -2,7 +2,7 @@ class HashMap {
   constructor(capacity, loadFactor) {
     this.capacity = capacity;
     this.loadFactor = loadFactor
-    this.hashMap = [];
+    this.hashMap = new Array(capacity);
   }
 
   hash(key) {
@@ -10,8 +10,7 @@ class HashMap {
       
    const primeNumber = 31;
    for (let i = 0; i < key.length; i++) {
-     hashCode = primeNumber * hashCode + key.charCodeAt(i);
-     hashCode %= 16;
+     hashCode = (primeNumber * hashCode + key.charCodeAt(i)) % this.capacity;
    }
 
    return hashCode;
@@ -20,6 +19,23 @@ class HashMap {
   set(key , value) {
     const index = this.hash(key);
     this.hashMap[index] = {[key]: value}
+
+    if (this.length() / this.capacity > this.loadFactor) {
+      this.resize();
+    }
+  }
+
+  resize() {
+    console.log("Resizing from", this.capacity, "to", this.capacity * 2);
+    const oldMap = this.hashMap;
+    this.capacity *= 2;
+    this.hashMap = new Array(this.capacity);
+
+    for (let bucket of oldMap) {
+      if (bucket) {
+        this.set(...Object.keys(bucket), ...Object.values(bucket))
+      }
+    }
   }
 
   get(key) {
@@ -58,7 +74,7 @@ class HashMap {
   }
 
   clear() {
-    this.hashMap = [];
+    this.hashMap = new Array(this.capacity);
   }
 
   keys() {
@@ -88,11 +104,12 @@ class HashMap {
         entriesArray.push(this.hashMap[i])
       }
     }
+    console.log(this.capacity * this.loadFactor)
     return entriesArray;
   }
 }
 
-const test = new HashMap()
+const test = new HashMap(16, 0.7)
 test.set('apple', 'red')
 test.set('banana', 'yellow')
 test.set('carrot', 'orange')
@@ -105,7 +122,8 @@ test.set('ice cream', 'white')
 test.set('jacket', 'blue')
 test.set('kite', 'pink')
 test.set('lion', 'golden')
+test.set('duck', 'green')
+test.set('cat', 'black')
+test.set('koala', 'grey')
 
-console.log(test.entries())
-console.log(test.clear())
-console.log(test.entries())
+console.log(test.length())
